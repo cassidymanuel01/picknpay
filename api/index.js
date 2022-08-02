@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const db = require('./config/dbconn');
 const {compare, genSalt, hash} = require('bcrypt');
+const jwt = require('jsonwebtoken')
 
 // Express app
 const app = express();
@@ -13,7 +14,7 @@ const app = express();
 const router = express.Router();
 
 // Configuration 
-const port = parseInt(process.env.Port) || 4000;
+const port = parseInt(process.env.PORT) || 4000;
 app.use(router, cors(), express.json(), express.urlencoded({ extended: true }));
 app.listen(port, ()=> {console.log(`Server is running on port ${port}`)});
 
@@ -48,28 +49,62 @@ router.post('/register', bodyParser.json(), async (req, res)=> {
 /* ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 // LOGIN
 router.post('/login', bodyParser.json(), (req, res)=> {
-    const {email, userpassword} = req.body
-    const strQry = 
-    `
-    SELECT firstname, gender, email, userpassword
-    FROM users
-    WHERE email = '${email}';
-    `;
-    db.query(strQry, [req.body.email, req.body.userpassword], (err, results)=> {
-    if (compare(userpassword, req.body.userpassword) == true) {
-        res.send('Ok')
-    } else {
-        res.send('404 ERROR');
-    }
+    const strQry = `SELECT * FROM users WHERE ? ;`;
+    let user = {
+        email: req.body.email
+    };
 
-    })
-/*
-Have to compare: 
-compare(req.body.userpassword, results.userpassword)
-======
-require('crypto').randomBytes(64).toString('hex')
-*/
+    db.query(strQry, user, async(err, results)=> {
+        if (err) throw err;
+
+        if (results.length === 0) {
+            res.send('Email not found. Please register')
+        } else {
+            const isMatch = await compare(req.body.userpassword, results[0].userpassword);
+            if (!isMatch) {
+                res.send('Password is Incorrect')
+            } else {
+                const payload = {
+                    user: {
+                      firstname: results[0].firstname,
+                      lastname: results[0].lastname,
+                      gender: results[0].gender,
+                      address: results[0].address,
+                      userRole: results[0].userRole,
+                      email: results[0].email,
+                      userpassword: results[0].userpassword,
+                    },
+                  };
+
+                jwt.sign(payload,process.env.jwtSecret,{expiresIn: "365d"},(err, token) => {
+                    if (err) throw err;
+                    res.json({
+                        tokenSecret: token
+                    });
+                  }
+                );  
+            }
+        }
+
+    }) 
 })
+
+
+
+/* ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+// VERIFY USER
+router.get("/users/verify", (req, res) => {
+    const token = req.header("x-auth-token");
+
+    jwt.verify(token, process.env.jwtSecret, (error, decodedToken) => {
+      if (error) {
+        res.status(401).send("Unauthorized Access!");
+      } else {
+        res.status(200).send(decodedToken);
+      }
+    });
+  });
+
 
 
 
@@ -81,15 +116,15 @@ router.post('/products', bodyParser.json(), (req, res)=> {
     // Query
     const strQry = 
     `
-    INSERT INTO products(prodName, prodUrl, quantity, price, totalamount, dateCreated)
-    VALUES(?, ?, ?, ?, ?, ?);
+    INSERT INTO products(prodName, prodUrl, quantity, price, totalamount, category, stockDateImported)
+    VALUES(?, ?, ?, ?, ?, ?, ?);
     `;
     //
     db.query(strQry, 
-        [bd.prodName, bd.prodUrl, bd.quantity, bd.price, bd.totalamount, bd.dateCreated],
+        [bd.prodName, bd.prodUrl, bd.quantity, bd.price, bd.totalamount, bd.category, bd.stockDateImported],
         (err, results)=> {
             if(err) throw err;
-            res.send(`number of affected row/s: ${results.affectedRows}`);
+            res.status(201).send(`number of affected row/s: ${results.affectedRows}`);
         })
 });
 
@@ -102,7 +137,7 @@ router.get('/products', (req, res)=> {
     // Query
     const strQry = 
     `
-    SELECT id, prodName,prodUrl, quantity, price, totalamount, dateCreated, userid
+    SELECT id, prodName,prodUrl, quantity, price, totalamount, stockDateImported, userid
     FROM products;
     `;
     db.query(strQry, (err, results)=> {
@@ -122,7 +157,7 @@ router.get('/products/:id', (req, res)=> {
     // Query
     const strQry = 
     `
-    SELECT id, prodName, prodUrl, quantity, price, totalamount, dateCreated, userid
+    SELECT id, prodName, prodUrl, quantity, price, totalamount, stockDateImported, userid
     FROM products
     WHERE id = ?;
     `;
