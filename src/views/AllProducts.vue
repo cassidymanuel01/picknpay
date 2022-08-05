@@ -5,9 +5,10 @@
       <div class="row">
         <div class="col-md-3 pb-5" v-for="product in products" :key="product">
       <div class="card">
+        <h1>{{product.prodName}}</h1>
         <div class="card-body">
           <div class="row">
-            <div class="col-12"><img :src="products.prodUrl" class="img-fluid border border-2 border-white rounded"></div>
+            <div class="col-12"><img :src="product.prodUrl" class="img-fluid border border-2 border-white rounded"></div>
             <div class="col-12"><p class="text-black">Lorem ipsum dolor sit amet consectetur adipisicing elit. At quaerat id fugit minus recusandae. Placeat delectus dolores sunt eos consequatur esse et porro, perferendis nisi dolorum! Dolor mollitia maxime dolorum. Voluptates earum adipisci unde ipsum soluta et, ullam blanditiis, mollitia doloremque nesciunt eaque expedita enim, nihil harum modi illo ipsa!</p>
             </div>
           </div>
@@ -42,6 +43,9 @@ export default {
   background-attachment: fixed;
   background-position: center;
   color: white;
+    display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
 }
 
 .container {
@@ -52,9 +56,14 @@ export default {
   background-attachment: fixed;
   background-position: center;
   color: white;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
 }
 
-
+h1{
+  color: black;
+}
 
 
 </style>

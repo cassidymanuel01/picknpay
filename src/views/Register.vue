@@ -1,17 +1,16 @@
 <template>
   <div class="register d-flex justify-content-center align-items-center flex-column">
     <div class="container d-flex justify-content-center align-items-center flex-column">
-  <div class="form pb-3">
+  <form class="form pb-3" action="https://cm-picknpayapi.herokuapp.com/register" method="POST">
     <div class="row">
       <div class="col-12 pt-5">
       <h2 class="display-3 pt-5 text-white">Register</h2>
       </div>
       <div class="col-12">
-        <h4
-        ><label for="name">Name:</label></h4>
+        <h4><label for="name">Name:</label></h4>
         </div>
         <div class="col-12">
-          <input  name="name" type="text" placeHolder="Enter your First Name" class="form-control w-100 mx-auto">
+          <input  name="firstname" type="text" placeHolder="Enter your First Name" class="form-control w-100 mx-auto" v-model="firstname">
         </div>
         </div>
         <div class="row">
@@ -19,7 +18,7 @@
           <h4><label for="surname">Surname:</label></h4>
         </div>
         <div class="col-12">
-          <input name="surname" type="text" placeHolder="Enter your Last Name" class="form-control w-100 mx-auto">
+          <input name="lastname" type="text" placeHolder="Enter your Last Name" class="form-control w-100 mx-auto" v-model="surname">
         </div>
         </div>
         <div class="row">
@@ -27,7 +26,7 @@
           <h4><label for="email">Email:</label></h4>
         </div>
         <div class="col-12">
-          <input name="email" type="email" placeHolder="Enter your Email" class="form-control w-100 mx-auto">
+          <input name="email" type="email" placeHolder="Enter your Email" class="form-control w-100 mx-auto" v-model="email">
         </div>
         </div>
         <div class="row">
@@ -35,7 +34,7 @@
           <h4><label for="password">Password:</label></h4>
         </div>
         <div class="col-12">
-          <input name="password" type="text" placeHolder="Enter your Password" class="form-control w-100 mx-auto">
+          <input name="userpassword" type="text" placeHolder="Enter your Password" class="form-control w-100 mx-auto" v-model="password">
         </div>
         </div>
         <div class="row">
@@ -56,10 +55,10 @@
             <h5><input type="radio" value="other" name="gender">          Other</h5>
             </div>
             </div>
-        </div>
         <div class="col-12 pt-3">
-          <button class="btn btn-success">Register</button>
+          <button class="btn btn-success" type="submit">Register</button>
         </div>
+        </form>
     </div>
   </div>
 </template>
@@ -83,7 +82,7 @@ export default {
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: center;
-  height: 130vh;
+  height: 100vh;
   color: white;
   padding: 10px;
 }
@@ -99,7 +98,6 @@ export default {
   background-attachment: fixed;
   background-position: center;
   color: white;
-  margin: 50px;
   padding: 50px;
 }
 
